@@ -15,7 +15,9 @@ public struct ServiceMacro: PeerMacro {
             return []
         }
         let name = node.firstArgument ?? "\(type.typeName)\(node.attributeName)"
-        let result = try type.expandService(name: name)
+        let functions = try type.buildFunctions(accessSpecifier: type.accessSpecifier)
+        let result = try type.expandService(name: name, content: functions)
+        
         return [
             """
             \(raw: result)
@@ -24,37 +26,6 @@ public struct ServiceMacro: PeerMacro {
     }
 }
 
-extension AttributeSyntax {
-    var firstArgument: String? {
-        if case let .argumentList(list) = arguments {
-            return list.first?.expression.description.withoutQuotes
-        }
-        return nil
-    }
-}
-
-extension String {
-    var withoutQuotes: String {
-        filter { $0 != "\"" }
-    }
-}
-
-
-extension ProtocolDeclSyntax {
-    func expandService(name: String) throws -> String {
-        """
-        \(accessSpecifier)struct \(name): \(typeName) {
-            let session: URLSessionManager
-        
-            \(accessSpecifier)init(session: URLSessionManager) {
-                self.session = session
-            }
-        
-            
-        }
-        """
-    }
-}
 
 @main
 struct MacroNetPlugin: CompilerPlugin {
