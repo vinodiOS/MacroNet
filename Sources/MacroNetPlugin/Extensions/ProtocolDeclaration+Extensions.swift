@@ -48,9 +48,10 @@ extension FunctionDeclSyntax {
         let name = self.name.text
         let effectSpecifiers = self.signature.effectSpecifiers?.description ?? ""
         let returnClause = self.signature.returnClause?.type.description ?? ""
+        
         return """
         \(accessModifer)func \(name)() \(effectSpecifiers)-> \(returnClause) {
-                return session.request()
+                return try await session.request()
                     .async()
         }
         """
